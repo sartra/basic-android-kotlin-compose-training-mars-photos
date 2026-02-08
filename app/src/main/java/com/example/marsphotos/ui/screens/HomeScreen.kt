@@ -30,7 +30,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.example.marsphotos.R
+import com.example.marsphotos.data.MarsPhoto
 import com.example.marsphotos.ui.theme.MarsPhotosTheme
 
 @Composable
@@ -47,14 +49,12 @@ fun HomeScreen(
             )
         }
         is MarsUiState.Error -> {
-            ResultScreen(
-                photos = stringResource(R.string.loading_failed),
+            ErrorScreen(
                 modifier = modifier.padding(top = contentPadding.calculateTopPadding())
             )
         }
         is MarsUiState.Loading -> {
-            ResultScreen(
-                photos = stringResource(R.string.loading),
+            LoadingScreen(
                 modifier = modifier.padding(top = contentPadding.calculateTopPadding())
             )
         }
@@ -65,12 +65,15 @@ fun HomeScreen(
  * ResultScreen displaying number of photos retrieved.
  */
 @Composable
-fun ResultScreen(photos: String, modifier: Modifier = Modifier) {
+fun ResultScreen(photos: List<MarsPhoto>, modifier: Modifier = Modifier) {
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
     ) {
-        Text(text = photos)
+        Text(text = "Photos retrieved: ${photos.size}")
+//        AsyncImage(
+//
+//        )
     }
 }
 
@@ -78,7 +81,7 @@ fun ResultScreen(photos: String, modifier: Modifier = Modifier) {
 @Composable
 fun ResultScreenPreview() {
     MarsPhotosTheme {
-        ResultScreen(stringResource(R.string.placeholder_result))
+        ResultScreen(listOf())
     }
 }
 
