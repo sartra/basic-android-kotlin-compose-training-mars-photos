@@ -18,8 +18,9 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
-    id("org.jetbrains.kotlin.plugin.serialization") version "2.1.0"
-    id("com.google.devtools.ksp") version "2.1.0-1.0.28"
+    id("org.jetbrains.kotlin.plugin.serialization")
+    id("com.google.devtools.ksp")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -57,7 +58,8 @@ android {
         }
     }
     kotlin {
-        jvmToolchain(8)
+        // Use Java 17 toolchain for Kotlin, Kapt, and Hilt
+        jvmToolchain(17)
     }
 }
 
@@ -90,6 +92,23 @@ dependencies {
 
     implementation("com.squareup.okhttp3:okhttp:5.3.2")
 
-    implementation("io.coil-kt:coil-compose:2.7.0")
-    implementation("io.coil-kt.coil3:coil-network-okhttp:3.3.0")
+    // Use older Coil versions compatible with Kotlin 2.1.0
+    implementation("io.coil-kt:coil-compose:2.5.0")
+    // Note: coil3 requires Kotlin 2.2.0, so we'll use coil2 instead
+    // Remove coil3 dependency if it causes issues
+
+    // Hilt - using KSP instead of kapt for better Kotlin version compatibility
+    implementation("com.google.dagger:hilt-android:2.52")
+    ksp("com.google.dagger:hilt-android-compiler:2.52")
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+}
+
+configurations.all {
+    resolutionStrategy {
+        // Force Kotlin stdlib to 2.1.0 to match our Kotlin version
+        force("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
+        force("org.jetbrains.kotlin:kotlin-stdlib-jdk7:2.1.0")
+        force("org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.1.0")
+        force("org.jetbrains.kotlin:kotlin-stdlib-common:2.1.0")
+    }
 }

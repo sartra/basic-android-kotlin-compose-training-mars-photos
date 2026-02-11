@@ -1,14 +1,28 @@
 package com.example.marsphotos.data
 
+import kotlinx.coroutines.flow.Flow
 
 interface PhotoRepository {
-    suspend fun getPhotos(): List<MarsPhoto>
+    fun getMarsPhotos(): Flow<List<MarsPhoto>>
+    suspend fun refreshPhotos()
 }
 
-class PhotoRepositoryImpl(private val marsApiService: MarsApiService) : PhotoRepository {
+class DefaultPhotoRepository(
+    private val marsApiService: MarsApiService,
+    private val marsPhotosDao: MarsPhotosDao
+) : PhotoRepository {
 
-    override suspend fun getPhotos(): List<MarsPhoto> {
-        return marsApiService.getPhotos()
+    override fun getMarsPhotos(): Flow<List<MarsPhoto>> {
+        return marsPhotosDao.getMarsPhotos()
+    }
+
+    override suspend fun refreshPhotos() {
+        try {
+            val photos = marsApiService.getPhotos()
+            marsPhotosDao.insertAll(photos)
+        } catch (e: Exception) {
+            // Error handling is done in the ViewModel
+            throw e
+        }
     }
 }
-

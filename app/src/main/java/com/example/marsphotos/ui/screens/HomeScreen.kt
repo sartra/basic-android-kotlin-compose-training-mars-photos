@@ -20,12 +20,17 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -62,18 +67,36 @@ fun HomeScreen(
 }
 
 /**
- * ResultScreen displaying number of photos retrieved.
+ * ResultScreen displaying photos in a grid.
  */
 @Composable
 fun ResultScreen(photos: List<MarsPhoto>, modifier: Modifier = Modifier) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = modifier
-    ) {
-        Text(text = "Photos retrieved: ${photos.size}")
-//        AsyncImage(
-//
-//        )
+
+    if (photos.isEmpty()) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = modifier.fillMaxSize()
+        ) {
+            Text(text = "No photos available")
+        }
+    } else {
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(150.dp),
+            modifier = modifier.fillMaxSize(),
+            contentPadding = PaddingValues(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            items(photos) { photo ->
+                AsyncImage(
+                    model = photo.imgSrc,
+                    contentDescription = stringResource(R.string.mars_photo),
+                    contentScale = ContentScale.Crop,
+                    error = painterResource(R.drawable.ic_broken_image),
+                    modifier = Modifier.size(150.dp)
+                )
+            }
+        }
     }
 }
 

@@ -32,9 +32,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.marsphotos.R
 import com.example.marsphotos.ui.screens.HomeScreen
 import com.example.marsphotos.ui.screens.MarsViewModel
@@ -49,8 +48,7 @@ fun MarsPhotosApp() {
         Surface(
             modifier = Modifier.fillMaxSize()
         ) {
-            val context = LocalContext.current
-            val marsViewModel: MarsViewModel = viewModel { MarsViewModel(context.applicationContext as android.app.Application) }
+            val marsViewModel: MarsViewModel = hiltViewModel()
             val marsUiState by marsViewModel.marsUiState.collectAsState()
             HomeScreen(
                 marsUiState = marsUiState,

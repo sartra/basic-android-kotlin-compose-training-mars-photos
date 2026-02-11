@@ -15,12 +15,11 @@
  */
 package com.example.marsphotos.ui.screens
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.marsphotos.data.MarsApi
 import com.example.marsphotos.data.MarsPhoto
-import com.example.marsphotos.data.MarsPhotosDatabase
+import com.example.marsphotos.data.PhotoRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -28,11 +27,12 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.io.IOException
+import javax.inject.Inject
 
-class MarsViewModel(application: Application) : AndroidViewModel(application) {
-
-    private val database = MarsPhotosDatabase.getDatabase(application)
-    private val dao = database.dao
+@HiltViewModel
+class MarsViewModel @Inject constructor(
+    private val photoRepository: PhotoRepository
+) : ViewModel() {
 
     private val _marsUiState = MutableStateFlow<MarsUiState>(MarsUiState.Loading)
     val marsUiState: StateFlow<MarsUiState> = _marsUiState.asStateFlow()
@@ -40,7 +40,7 @@ class MarsViewModel(application: Application) : AndroidViewModel(application) {
     init {
         // Observe Room database for offline-first approach
         viewModelScope.launch {
-            dao.getMarsPhotos()
+            photoRepository.getMarsPhotos()
                 .catch { e ->
                     _marsUiState.value = MarsUiState.Error
                 }
@@ -58,18 +58,16 @@ class MarsViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     /**
-     * Gets Mars photos information from the Mars API Retrofit service and saves to Room database.
+     * Gets Mars photos information from the API and saves to Room database via repository.
      */
     fun getMarsPhotos() {
         viewModelScope.launch {
             try {
-                val listResult = MarsApi.retrofitService.getPhotos()
-                // Save to Room database
-                dao.insertAll(listResult)
+                photoRepository.refreshPhotos()
                 // State will be updated automatically via Flow observation
             } catch (e: IOException) {
                 // Only show error if we don't have cached data
-                val cachedPhotos = dao.getMarsPhotos().first()
+                val cachedPhotos = photoRepository.getMarsPhotos().first()
                 if (cachedPhotos.isEmpty() && _marsUiState.value is MarsUiState.Loading) {
                     _marsUiState.value = MarsUiState.Error
                 }
